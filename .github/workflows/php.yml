@@ -11,22 +11,22 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php: ['7.4', '8.0', '8.1', '8.2'] # Prueba en múltiples versiones de PHP
+        php: ['7.4', '8.0', '8.1', '8.2'] # Testing on multiple PHP versions
     steps:
     - uses: actions/checkout@v4
 
-    # Configura la versión de PHP
+    # Set up PHP version
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ matrix.php }}
         tools: composer, phpunit
-
-    # Validar composer.json y composer.lock
+    
+    # Validate composer.json and composer.lock
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
 
-    # Cache de dependencias de Composer
+    # Cache Composer dependencies
     - name: Cache Composer packages
       id: composer-cache
       uses: actions/cache@v3
@@ -35,27 +35,21 @@ jobs:
         key: ${{ runner.os }}-php-${{ matrix.php }}-${{ hashFiles('**/composer.lock') }}
         restore-keys: |
           ${{ runner.os }}-php-${{ matrix.php }}-
+          ${{ runner.os }}-php-
 
-    # Instalar dependencias
+    # Install dependencies
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --no-suggest
 
-    # Validar código PHP (opcional)
+    # Analyze PHP code (optional)
     - name: Analyze code with PHPStan
       run: vendor/bin/phpstan analyse
 
-    # Ejecutar pruebas
+    # Run tests
     - name: Run test suite
       run: composer run-script test
 
-    # Opcional: Subir reporte de cobertura
-    # - name: Upload code coverage
-    #   uses: codecov/codecov-action@v3
-    #   with:
-    #     file: coverage.xml
-    #     flags: unittests
-
-  # Publicación condicional (opcional)
+  # Conditional publication (only on push to main)
   publish:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
