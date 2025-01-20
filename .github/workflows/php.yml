@@ -22,8 +22,12 @@ jobs:
         php-version: ${{ matrix.php }}
         tools: composer, phpunit
     
-    # Validate composer.json and composer.lock
-    - name: Validate composer.json and composer.lock
+    # Validate composer.json (strict mode)
+    - name: Validate composer.json
+      run: composer validate --strict
+
+    # Validate composer.lock (this will automatically happen when installing dependencies)
+    - name: Validate composer.lock
       run: composer validate --strict
 
     # Cache Composer dependencies
@@ -56,3 +60,4 @@ jobs:
     steps:
     - name: Publish package
       run: composer publish --access-token ${{ secrets.COMPOSER_AUTH }}
+
